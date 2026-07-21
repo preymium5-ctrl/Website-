@@ -246,6 +246,31 @@ button {
   transform: translateY(-2px);
 }
 
+/* Discord brand button (Blurple #5865F2) */
+.btn-discord {
+  background: #5865F2;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-discord:hover {
+  background: #4752c4;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(88, 101, 242, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-discord .icon-discord {
+  flex-shrink: 0;
+}
+
+.footer-socials a.social-discord:hover {
+  background: #5865F2;
+  color: #ffffff;
+  border-color: #5865F2;
+}
+
 /* Mobile Navigation Hamburger */
 .menu-toggle {
   display: none;
@@ -2152,7 +2177,8 @@ button {
   }
 
   .btn-primary:hover,
-  .btn-secondary:hover {
+  .btn-secondary:hover,
+  .btn-discord:hover {
     transform: none;
   }
 
