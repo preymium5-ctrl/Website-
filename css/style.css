@@ -1033,6 +1033,18 @@ button {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   box-shadow: var(--card-shadow);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+.slider-wrapper.is-dragging {
+  cursor: grabbing;
+}
+
+.slider-wrapper.is-dragging .slide {
+  transition: none;
 }
 
 .slide {
@@ -1043,18 +1055,86 @@ button {
   height: 100%;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--transition-slow), visibility var(--transition-slow);
+  transition: opacity 0.35s ease, visibility 0.35s ease, transform 0.35s ease;
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-card);
+  will-change: transform, opacity;
 }
 
 .slide.active {
   opacity: 1;
   visibility: visible;
   z-index: 2;
+}
+
+/* Directional swipe / carousel animations */
+.slide.slide-in-right {
+  animation: slideInFromRight 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.slide.slide-in-left {
+  animation: slideInFromLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.slide.slide-out-left {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+  animation: slideOutToLeft 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.slide.slide-out-right {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+  animation: slideOutToRight 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0.35;
+    transform: translateX(28%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0.35;
+    transform: translateX(-28%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-22%);
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(22%);
+  }
 }
 
 .slide-banner-img {
@@ -1064,6 +1144,56 @@ button {
   object-fit: contain;
   object-position: center;
   display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* Mobile swipe hint under gallery */
+.swipe-hint {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.swipe-hint svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.75;
+  animation: swipe-hint-nudge 1.6s ease-in-out infinite;
+}
+
+@keyframes swipe-hint-nudge {
+  0%, 100% { transform: translateX(0); opacity: 0.55; }
+  50% { transform: translateX(4px); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .swipe-hint {
+    display: flex;
+  }
+
+  .slider-wrapper {
+    cursor: default;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide.slide-in-right,
+  .slide.slide-in-left,
+  .slide.slide-out-left,
+  .slide.slide-out-right {
+    animation: none;
+  }
+
+  .swipe-hint svg {
+    animation: none;
+  }
 }
 
 /* Changelog Timeline Accordion */

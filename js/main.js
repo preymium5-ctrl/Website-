@@ -73,40 +73,199 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   window.addEventListener('scroll', scrollSpy);
 
-  // 4. Interactive Slide Carousel (Screenshots)
+  // 4. Interactive Slide Carousel (Screenshots) + mobile swipe
   const slides = document.querySelectorAll('.slide');
   const dots = document.querySelectorAll('.dot');
   const prevBtn = document.getElementById('prev-btn');
   const nextBtn = document.getElementById('next-btn');
+  const sliderWrapper = document.getElementById('slider-wrapper');
   let currentSlide = 0;
+  let isAnimating = false;
 
-  const showSlide = (index) => {
-    slides.forEach(slide => slide.classList.remove('active'));
+  const showSlide = (index, direction = 'next') => {
+    if (!slides.length) return;
+    if (index === currentSlide && slides[index].classList.contains('active')) return;
+    if (isAnimating) return;
+
+    const total = slides.length;
+    index = ((index % total) + total) % total;
+
+    const prev = slides[currentSlide];
+    const next = slides[index];
+
+    isAnimating = true;
+
+    // Clear residual animation classes
+    slides.forEach(slide => {
+      slide.classList.remove(
+        'active',
+        'slide-in-left',
+        'slide-in-right',
+        'slide-out-left',
+        'slide-out-right'
+      );
+    });
     dots.forEach(dot => dot.classList.remove('active'));
-    
-    slides[index].classList.add('active');
-    dots[index].classList.add('active');
+
+    const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
+    const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
+
+    if (prev) {
+      prev.classList.add(outClass);
+    }
+    next.classList.add('active', inClass);
+    if (dots[index]) dots[index].classList.add('active');
     currentSlide = index;
+
+    const cleanup = () => {
+      slides.forEach(slide => {
+        slide.classList.remove(
+          'slide-in-left',
+          'slide-in-right',
+          'slide-out-left',
+          'slide-out-right'
+        );
+      });
+      isAnimating = false;
+    };
+
+    // Fallback if animationend doesn't fire
+    const timer = setTimeout(cleanup, 450);
+    next.addEventListener('animationend', () => {
+      clearTimeout(timer);
+      cleanup();
+    }, { once: true });
   };
 
-  if (prevBtn && nextBtn) {
-    prevBtn.addEventListener('click', () => {
-      let index = currentSlide - 1;
-      if (index < 0) index = slides.length - 1;
-      showSlide(index);
-    });
+  const goPrev = () => showSlide(currentSlide - 1, 'prev');
+  const goNext = () => showSlide(currentSlide + 1, 'next');
 
-    nextBtn.addEventListener('click', () => {
-      let index = currentSlide + 1;
-      if (index >= slides.length) index = 0;
-      showSlide(index);
-    });
+  if (prevBtn && nextBtn) {
+    prevBtn.addEventListener('click', goPrev);
+    nextBtn.addEventListener('click', goNext);
 
     dots.forEach(dot => {
       dot.addEventListener('click', () => {
-        const slideIndex = parseInt(dot.getAttribute('data-slide'));
-        showSlide(slideIndex);
+        const slideIndex = parseInt(dot.getAttribute('data-slide'), 10);
+        if (Number.isNaN(slideIndex)) return;
+        const direction = slideIndex > currentSlide ? 'next' : 'prev';
+        showSlide(slideIndex, direction);
       });
+    });
+  }
+
+  // Touch / pointer swipe on the gallery
+  if (sliderWrapper && slides.length) {
+    let startX = 0;
+    let startY = 0;
+    let deltaX = 0;
+    let tracking = false;
+    let lockedAxis = null; // 'x' | 'y' | null
+    const SWIPE_THRESHOLD = 45;
+    const DRAG_RESISTANCE = 0.35;
+
+    const resetDragVisual = () => {
+      sliderWrapper.style.setProperty('--drag-x', '0px');
+      sliderWrapper.classList.remove('is-dragging');
+      slides.forEach(slide => {
+        slide.style.transform = '';
+      });
+    };
+
+    const onPointerDown = (clientX, clientY) => {
+      if (isAnimating) return;
+      tracking = true;
+      lockedAxis = null;
+      startX = clientX;
+      startY = clientY;
+      deltaX = 0;
+      sliderWrapper.classList.add('is-dragging');
+    };
+
+    const onPointerMove = (clientX, clientY, event) => {
+      if (!tracking) return;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+
+      if (!lockedAxis) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        lockedAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      }
+
+      // Vertical intent → let the page scroll
+      if (lockedAxis === 'y') {
+        tracking = false;
+        resetDragVisual();
+        return;
+      }
+
+      if (event && event.cancelable) event.preventDefault();
+      deltaX = dx;
+      const offset = deltaX * DRAG_RESISTANCE;
+      sliderWrapper.style.setProperty('--drag-x', `${offset}px`);
+
+      const active = slides[currentSlide];
+      if (active) {
+        active.style.transform = `translateX(${offset}px)`;
+      }
+    };
+
+    const onPointerUp = () => {
+      if (!tracking && deltaX === 0) {
+        resetDragVisual();
+        return;
+      }
+      tracking = false;
+
+      const active = slides[currentSlide];
+      if (active) active.style.transform = '';
+
+      if (Math.abs(deltaX) >= SWIPE_THRESHOLD) {
+        if (deltaX < 0) {
+          goNext(); // swipe left → next
+        } else {
+          goPrev(); // swipe right → previous
+        }
+      }
+      deltaX = 0;
+      lockedAxis = null;
+      resetDragVisual();
+    };
+
+    // Touch events (mobile)
+    sliderWrapper.addEventListener('touchstart', (e) => {
+      const t = e.changedTouches[0];
+      onPointerDown(t.clientX, t.clientY);
+    }, { passive: true });
+
+    sliderWrapper.addEventListener('touchmove', (e) => {
+      const t = e.changedTouches[0];
+      onPointerMove(t.clientX, t.clientY, e);
+    }, { passive: false });
+
+    sliderWrapper.addEventListener('touchend', onPointerUp, { passive: true });
+    sliderWrapper.addEventListener('touchcancel', () => {
+      tracking = false;
+      deltaX = 0;
+      lockedAxis = null;
+      resetDragVisual();
+    }, { passive: true });
+
+    // Mouse drag (desktop convenience)
+    let mouseDown = false;
+    sliderWrapper.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      mouseDown = true;
+      onPointerDown(e.clientX, e.clientY);
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!mouseDown) return;
+      onPointerMove(e.clientX, e.clientY, e);
+    });
+    window.addEventListener('mouseup', () => {
+      if (!mouseDown) return;
+      mouseDown = false;
+      onPointerUp();
     });
   }
 
