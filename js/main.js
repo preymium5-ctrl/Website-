@@ -9,21 +9,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const navMenu = document.getElementById('nav-menu');
   const navLinks = document.querySelectorAll('.nav-link');
 
+  const setMenuOpen = (open) => {
+    if (!menuToggle || !navMenu) return;
+    menuToggle.classList.toggle('active', open);
+    navMenu.classList.toggle('active', open);
+    menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.body.classList.toggle('nav-open', open);
+  };
+
   if (menuToggle && navMenu) {
     menuToggle.addEventListener('click', () => {
-      const isExpanded = menuToggle.classList.contains('active');
-      menuToggle.classList.toggle('active');
-      navMenu.classList.toggle('active');
-      menuToggle.setAttribute('aria-expanded', !isExpanded);
+      const willOpen = !menuToggle.classList.contains('active');
+      setMenuOpen(willOpen);
     });
 
-    // Close menu when clicking navigation links
-    navLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        menuToggle.classList.remove('active');
-        navMenu.classList.remove('active');
-        menuToggle.setAttribute('aria-expanded', 'false');
-      });
+    // Close menu when tapping any link/CTA inside the drawer
+    navMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => setMenuOpen(false));
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+        setMenuOpen(false);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 992 && navMenu.classList.contains('active')) {
+        setMenuOpen(false);
+      }
     });
   }
 
@@ -171,12 +185,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 7. Hero phone — cursor-tracking 3D tilt
+  // 7. Hero phone — cursor-tracking 3D tilt (desktop pointer only)
   const mockupScene = document.getElementById('mockup-scene');
   const heroPhone = document.getElementById('hero-phone');
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const coarsePointer = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-  if (mockupScene && heroPhone && !prefersReducedMotion) {
+  if (mockupScene && heroPhone && !prefersReducedMotion && !coarsePointer) {
     let targetRX = 0;
     let targetRY = 0;
     let currentRX = 0;
