@@ -344,63 +344,142 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 7. Hero phone — cursor-tracking 3D tilt (desktop pointer only)
+  // 7. Hero phone — 3D tilt (mouse on desktop, touch + idle float on mobile)
   const mockupScene = document.getElementById('mockup-scene');
   const heroPhone = document.getElementById('hero-phone');
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const coarsePointer = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-  if (mockupScene && heroPhone && !prefersReducedMotion && !coarsePointer) {
+  if (mockupScene && heroPhone && !prefersReducedMotion) {
     let targetRX = 0;
     let targetRY = 0;
     let currentRX = 0;
     let currentRY = 0;
-    let hovering = false;
+    let interacting = false;
     let rafId = null;
+    let idleTime = 0;
+    let lastTs = 0;
 
-    const maxTilt = 12; // degrees
+    const maxTilt = coarsePointer ? 14 : 12;
+    // Mobile keeps a continuous idle loop so the phone always animates
+    const alwaysAnimate = coarsePointer || window.matchMedia('(max-width: 992px)').matches;
 
-    const animate = () => {
-      currentRX += (targetRX - currentRX) * 0.1;
-      currentRY += (targetRY - currentRY) * 0.1;
+    const applyTiltFromPoint = (clientX, clientY) => {
+      const rect = mockupScene.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const px = (clientX - rect.left) / rect.width;
+      const py = (clientY - rect.top) / rect.height;
+      // Clamp so off-edge touches don't over-rotate
+      const cx = Math.min(1, Math.max(0, px));
+      const cy = Math.min(1, Math.max(0, py));
+      targetRY = (cx - 0.5) * maxTilt * 2;
+      targetRX = (0.5 - cy) * maxTilt * 2;
+    };
+
+    const animate = (ts) => {
+      if (!lastTs) lastTs = ts;
+      const dt = Math.min(0.05, (ts - lastTs) / 1000);
+      lastTs = ts;
+
+      // Gentle floating idle motion when not interacting (especially mobile)
+      if (!interacting && alwaysAnimate) {
+        idleTime += dt;
+        targetRX = Math.sin(idleTime * 0.9) * 5 + Math.sin(idleTime * 0.35) * 1.5;
+        targetRY = Math.cos(idleTime * 0.7) * 6 + Math.sin(idleTime * 0.45) * 2;
+      }
+
+      const ease = alwaysAnimate ? 0.08 : 0.1;
+      currentRX += (targetRX - currentRX) * ease;
+      currentRY += (targetRY - currentRY) * ease;
 
       heroPhone.style.transform =
-        `rotateX(${currentRX}deg) rotateY(${currentRY}deg)`;
+        `rotateX(${currentRX.toFixed(3)}deg) rotateY(${currentRY.toFixed(3)}deg)`;
 
       const stillMoving =
-        Math.abs(targetRX - currentRX) > 0.05 ||
-        Math.abs(targetRY - currentRY) > 0.05;
+        Math.abs(targetRX - currentRX) > 0.04 ||
+        Math.abs(targetRY - currentRY) > 0.04;
 
-      if (hovering || stillMoving) {
+      if (interacting || stillMoving || alwaysAnimate) {
         rafId = requestAnimationFrame(animate);
       } else {
         rafId = null;
+        lastTs = 0;
       }
     };
 
     const startLoop = () => {
-      if (rafId == null) rafId = requestAnimationFrame(animate);
+      if (rafId == null) {
+        lastTs = 0;
+        rafId = requestAnimationFrame(animate);
+      }
     };
 
+    // Desktop pointer tracking
     mockupScene.addEventListener('mouseenter', () => {
-      hovering = true;
+      interacting = true;
       startLoop();
     });
 
     mockupScene.addEventListener('mousemove', (e) => {
-      const rect = mockupScene.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width;
-      const py = (e.clientY - rect.top) / rect.height;
-      targetRY = (px - 0.5) * maxTilt * 2;
-      targetRX = (0.5 - py) * maxTilt * 2;
+      interacting = true;
+      applyTiltFromPoint(e.clientX, e.clientY);
       startLoop();
     });
 
     mockupScene.addEventListener('mouseleave', () => {
-      hovering = false;
-      targetRX = 0;
-      targetRY = 0;
+      interacting = false;
+      if (!alwaysAnimate) {
+        targetRX = 0;
+        targetRY = 0;
+      }
       startLoop();
+    });
+
+    // Mobile / touch tracking — tilt follows finger on the phone
+    mockupScene.addEventListener('touchstart', (e) => {
+      const t = e.changedTouches[0];
+      if (!t) return;
+      interacting = true;
+      applyTiltFromPoint(t.clientX, t.clientY);
+      startLoop();
+    }, { passive: true });
+
+    mockupScene.addEventListener('touchmove', (e) => {
+      const t = e.changedTouches[0];
+      if (!t) return;
+      interacting = true;
+      applyTiltFromPoint(t.clientX, t.clientY);
+      startLoop();
+    }, { passive: true });
+
+    const endTouch = () => {
+      interacting = false;
+      // Return to idle float on mobile; settle flat on desktop-only
+      if (!alwaysAnimate) {
+        targetRX = 0;
+        targetRY = 0;
+      }
+      startLoop();
+    };
+
+    mockupScene.addEventListener('touchend', endTouch, { passive: true });
+    mockupScene.addEventListener('touchcancel', endTouch, { passive: true });
+
+    // Kick off idle animation immediately on mobile / small screens
+    if (alwaysAnimate) {
+      heroPhone.classList.add('is-animated');
+      startLoop();
+    }
+
+    // If user rotates/resizes into a mobile layout, start idle motion
+    window.addEventListener('resize', () => {
+      const shouldIdle =
+        window.matchMedia('(hover: none) and (pointer: coarse)').matches ||
+        window.matchMedia('(max-width: 992px)').matches;
+      if (shouldIdle) {
+        heroPhone.classList.add('is-animated');
+        startLoop();
+      }
     });
   }
 

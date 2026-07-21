@@ -433,6 +433,8 @@ button {
   justify-content: center;
   align-items: center;
   transform-style: preserve-3d;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Main device — espresso chassis, terracotta accent */
@@ -451,6 +453,12 @@ button {
   transform-style: preserve-3d;
   transition: box-shadow var(--transition-normal);
   will-change: transform;
+  transform: rotateX(0deg) rotateY(0deg);
+}
+
+/* Soft float used as CSS fallback before/alongside JS tilt on mobile */
+.device-frame.is-animated {
+  /* JS drives transform; this class marks interactive state */
 }
 
 .device-frame.shadow-glow {
@@ -2137,7 +2145,7 @@ button {
   }
 }
 
-/* Touch devices: prefer simpler hover, disable phone tilt feel */
+/* Touch devices: keep hover lifts off buttons/cards, keep phone animation */
 @media (hover: none) and (pointer: coarse) {
   .feature-card:hover {
     transform: none;
@@ -2148,8 +2156,32 @@ button {
     transform: none;
   }
 
+  .hero-mockup {
+    perspective: 900px;
+  }
+
   .device-frame {
-    will-change: auto;
+    will-change: transform;
+  }
+
+  /* CSS-only gentle float if JS is delayed/unavailable */
+  .device-frame:not(.is-animated) {
+    animation: phone-idle-float 5.5s ease-in-out infinite;
+  }
+}
+
+@keyframes phone-idle-float {
+  0%, 100% {
+    transform: rotateX(3deg) rotateY(-5deg) translateY(0);
+  }
+  50% {
+    transform: rotateX(-3deg) rotateY(5deg) translateY(-8px);
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (prefers-reduced-motion: reduce) {
+  .device-frame:not(.is-animated) {
+    animation: none;
   }
 }
 
