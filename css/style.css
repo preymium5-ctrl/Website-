@@ -1042,6 +1042,10 @@ button {
 
 .stat-links {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .stat-link {
@@ -1325,11 +1329,82 @@ button {
   margin-top: -1px;
 }
 
+.changelog-loading {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem 1rem;
+  font-size: 0.95rem;
+}
+
+.changelog-loading a {
+  color: var(--accent-light);
+  text-decoration: underline;
+}
+
 .changelog-summary {
   color: var(--text-primary);
   font-weight: 500;
   font-size: 0.95rem;
   margin: 1.5rem 0 1rem;
+}
+
+.changelog-body .changelog-summary {
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.65;
+  margin: 0.75rem 0;
+}
+
+.changelog-heading {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.65rem;
+}
+
+.changelog-heading:first-child {
+  margin-top: 0;
+}
+
+.changelog-hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.25rem 0;
+}
+
+.changelog-body a {
+  color: var(--accent-light);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.changelog-body a:hover {
+  color: var(--accent);
+}
+
+.changelog-body code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85em;
+  color: var(--text-primary);
+}
+
+.changelog-release-link {
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.changelog-release-link a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.changelog-release-link a:hover {
+  text-decoration: underline;
 }
 
 .changelog-details {
