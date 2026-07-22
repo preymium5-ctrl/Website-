@@ -269,36 +269,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 5. Timeline Changelog Accordions
-  const changelogItems = document.querySelectorAll('.timeline-accordion .accordion-item');
+  // 5. Timeline Changelog Accordions (works with static + dynamically loaded items)
+  const changelogRoot = document.getElementById('changelog-list');
 
-  changelogItems.forEach(item => {
-    const headerEl = item.querySelector('.accordion-header');
-    const contentEl = item.querySelector('.accordion-content');
+  const bindChangelogAccordions = (root) => {
+    if (!root) return;
+    const items = root.querySelectorAll('.accordion-item');
 
-    // Initialize height for pre-expanded active item
-    if (item.classList.contains('active')) {
-      contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
-    }
+    items.forEach(item => {
+      const headerEl = item.querySelector('.accordion-header');
+      const contentEl = item.querySelector('.accordion-content');
+      if (!headerEl || !contentEl) return;
 
-    headerEl.addEventListener('click', () => {
-      const isActive = item.classList.contains('active');
+      // Avoid double-binding after re-render
+      if (headerEl.dataset.bound === '1') return;
+      headerEl.dataset.bound = '1';
 
-      // Close all items
-      changelogItems.forEach(innerItem => {
-        innerItem.classList.remove('active');
-        innerItem.querySelector('.accordion-header').setAttribute('aria-expanded', 'false');
-        innerItem.querySelector('.accordion-content').style.maxHeight = null;
-      });
-
-      // Expand current if it wasn't active
-      if (!isActive) {
-        item.classList.add('active');
-        headerEl.setAttribute('aria-expanded', 'true');
+      if (item.classList.contains('active')) {
         contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
       }
+
+      headerEl.addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
+        const allItems = root.querySelectorAll('.accordion-item');
+
+        allItems.forEach(innerItem => {
+          innerItem.classList.remove('active');
+          const h = innerItem.querySelector('.accordion-header');
+          const c = innerItem.querySelector('.accordion-content');
+          if (h) h.setAttribute('aria-expanded', 'false');
+          if (c) c.style.maxHeight = null;
+        });
+
+        if (!isActive) {
+          item.classList.add('active');
+          headerEl.setAttribute('aria-expanded', 'true');
+          contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
+        }
+      });
     });
-  });
+  };
+
+  bindChangelogAccordions(changelogRoot);
 
   // 6. FAQ Accordions
   const faqCards = document.querySelectorAll('.faq-card');
@@ -327,13 +339,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Automatically recalculate heights on window resize (fixes accordion cuts on window changes)
   window.addEventListener('resize', () => {
-    // Re-adjust expanded timeline accordion heights
-    changelogItems.forEach(item => {
-      if (item.classList.contains('active')) {
+    if (changelogRoot) {
+      changelogRoot.querySelectorAll('.accordion-item.active').forEach(item => {
         const contentEl = item.querySelector('.accordion-content');
-        contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
-      }
-    });
+        if (contentEl) contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
+      });
+    }
 
     // Re-adjust expanded FAQ cards
     faqCards.forEach(card => {
@@ -343,6 +354,284 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // 8. Live GitHub Releases → download buttons, version labels, changelog
+  const GITHUB_REPO = 'preymium5-ctrl/Tarumi';
+  const RELEASES_API = `https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=10`;
+  const CACHE_KEY = 'tarumi_releases_cache_v1';
+  const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+
+  const escapeHtml = (str) =>
+    String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  const formatBytes = (bytes) => {
+    if (!bytes || bytes <= 0) return '—';
+    const mb = bytes / (1024 * 1024);
+    return `~${mb.toFixed(1)} MB`;
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch {
+      return '—';
+    }
+  };
+
+  const pickApkAsset = (release) => {
+    const assets = release.assets || [];
+    return (
+      assets.find(a => /app-release\.apk$/i.test(a.name)) ||
+      assets.find(a => /\.apk$/i.test(a.name)) ||
+      null
+    );
+  };
+
+  /** Lightweight markdown → HTML for GitHub release notes */
+  const markdownToHtml = (md) => {
+    if (!md) return '<p class="changelog-summary">No release notes provided.</p>';
+
+    const lines = md.replace(/\r\n/g, '\n').split('\n');
+    let html = '';
+    let inList = false;
+    let paraBuf = [];
+
+    const flushPara = () => {
+      if (!paraBuf.length) return;
+      const text = paraBuf.join(' ').trim();
+      paraBuf = [];
+      if (text) html += `<p class="changelog-summary">${inlineMd(text)}</p>`;
+    };
+
+    const closeList = () => {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+    };
+
+    const inlineMd = (text) => {
+      let t = escapeHtml(text);
+      // links [text](url)
+      t = t.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+      // bold **text**
+      t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      // inline code
+      t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+      return t;
+    };
+
+    for (const raw of lines) {
+      const line = raw.trimEnd();
+      const trimmed = line.trim();
+
+      if (!trimmed) {
+        flushPara();
+        closeList();
+        continue;
+      }
+
+      if (/^---+$/.test(trimmed)) {
+        flushPara();
+        closeList();
+        html += '<hr class="changelog-hr">';
+        continue;
+      }
+
+      const heading = trimmed.match(/^(#{1,4})\s+(.*)$/);
+      if (heading) {
+        flushPara();
+        closeList();
+        const level = Math.min(heading[1].length + 2, 5); // h3–h5
+        html += `<h${level} class="changelog-heading">${inlineMd(heading[2])}</h${level}>`;
+        continue;
+      }
+
+      const bullet = trimmed.match(/^[-*+]\s+(.*)$/);
+      if (bullet) {
+        flushPara();
+        if (!inList) {
+          html += '<ul class="changelog-details">';
+          inList = true;
+        }
+        html += `<li>${inlineMd(bullet[1])}</li>`;
+        continue;
+      }
+
+      const numbered = trimmed.match(/^\d+\.\s+(.*)$/);
+      if (numbered) {
+        flushPara();
+        if (!inList) {
+          html += '<ul class="changelog-details">';
+          inList = true;
+        }
+        html += `<li>${inlineMd(numbered[1])}</li>`;
+        continue;
+      }
+
+      closeList();
+      paraBuf.push(trimmed);
+    }
+
+    flushPara();
+    closeList();
+    return html || '<p class="changelog-summary">No release notes provided.</p>';
+  };
+
+  const readCache = () => {
+    try {
+      const raw = sessionStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.ts || !parsed.data) return null;
+      if (Date.now() - parsed.ts > CACHE_TTL_MS) return null;
+      return parsed.data;
+    } catch {
+      return null;
+    }
+  };
+
+  const writeCache = (data) => {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+    } catch {
+      /* ignore quota / private mode */
+    }
+  };
+
+  const applyReleaseMeta = (latest) => {
+    const tag = latest.tag_name || 'latest';
+    const apk = pickApkAsset(latest);
+    const downloadUrl =
+      (apk && apk.browser_download_url) ||
+      `https://github.com/${GITHUB_REPO}/releases/latest/download/app-release.apk`;
+    const apkName = (apk && apk.name) || 'app-release.apk';
+    const sizeLabel = formatBytes(apk && apk.size);
+    const dateLabel = formatDate(latest.published_at || latest.created_at);
+
+    document.querySelectorAll('[data-release-download]').forEach(el => {
+      el.setAttribute('href', downloadUrl);
+    });
+
+    const versionBadge = document.querySelector('[data-release-version-label]');
+    if (versionBadge) versionBadge.textContent = `${tag} Out Now`;
+
+    const heroLabel = document.querySelector('[data-release-hero-label]');
+    if (heroLabel) heroLabel.textContent = `Download ${tag} APK`;
+
+    const mainLabel = document.querySelector('[data-release-main-label]');
+    if (mainLabel) mainLabel.textContent = `Download ${apkName} (${tag})`;
+
+    const statVersion = document.querySelector('[data-release-version]');
+    if (statVersion) statVersion.textContent = tag;
+
+    const statSize = document.querySelector('[data-release-size]');
+    if (statSize) statSize.textContent = sizeLabel;
+
+    const statDate = document.querySelector('[data-release-date]');
+    if (statDate) statDate.textContent = dateLabel;
+
+    const footer = document.querySelector('[data-release-footer]');
+    if (footer) footer.textContent = `Current Version: ${tag} (Stable)`;
+
+    const headerBtn = document.getElementById('download-header-btn');
+    if (headerBtn) headerBtn.textContent = `Download ${tag}`;
+
+    document.title = `Tarumi ${tag} – Premium, Ad-Free Manga & Webtoon Reader for Android`;
+  };
+
+  const renderChangelog = (releases) => {
+    const list = document.getElementById('changelog-list');
+    if (!list) return;
+
+    const published = releases.filter(r => !r.draft && !r.prerelease);
+    if (!published.length) {
+      list.innerHTML =
+        '<p class="changelog-loading">No public releases found. <a href="https://github.com/preymium5-ctrl/Tarumi/releases" target="_blank" rel="noopener">View on GitHub</a></p>';
+      return;
+    }
+
+    list.innerHTML = published
+      .map((release, index) => {
+        const tag = escapeHtml(release.tag_name || 'release');
+        const title = escapeHtml(release.name || `Tarumi ${release.tag_name || ''}`);
+        const date = escapeHtml(formatDate(release.published_at || release.created_at));
+        const isLatest = index === 0;
+        const latestBadge = isLatest
+          ? ' <span class="badge-tag latest-tag">Latest</span>'
+          : '';
+        const bodyHtml = markdownToHtml(release.body || '');
+        const expanded = isLatest ? 'active' : '';
+        const aria = isLatest ? 'true' : 'false';
+
+        return `
+          <div class="accordion-item ${expanded}">
+            <button class="accordion-header" aria-expanded="${aria}" type="button">
+              <span class="accordion-version">${title || `Tarumi ${tag}`}${latestBadge}</span>
+              <span class="accordion-date">${date}</span>
+              <svg class="accordion-arrow" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
+            </button>
+            <div class="accordion-content">
+              <div class="accordion-content-inner changelog-body">
+                ${bodyHtml}
+                <p class="changelog-release-link">
+                  <a href="${escapeHtml(release.html_url)}" target="_blank" rel="noopener">View full release on GitHub →</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+
+    bindChangelogAccordions(list);
+  };
+
+  const loadReleases = async () => {
+    const loadingEl = document.getElementById('changelog-loading');
+
+    try {
+      let releases = readCache();
+
+      if (!releases) {
+        const res = await fetch(RELEASES_API, {
+          headers: {
+            Accept: 'application/vnd.github+json'
+          }
+        });
+        if (!res.ok) throw new Error(`GitHub API ${res.status}`);
+        releases = await res.json();
+        if (!Array.isArray(releases)) throw new Error('Unexpected API response');
+        writeCache(releases);
+      }
+
+      const latest =
+        releases.find(r => !r.draft && !r.prerelease) || releases[0];
+      if (latest) applyReleaseMeta(latest);
+      renderChangelog(releases);
+    } catch (err) {
+      console.warn('Failed to load GitHub releases:', err);
+      if (loadingEl) {
+        loadingEl.innerHTML =
+          'Could not load live releases. <a href="https://github.com/preymium5-ctrl/Tarumi/releases" target="_blank" rel="noopener">Open GitHub Releases</a> instead.';
+      } else if (changelogRoot) {
+        changelogRoot.innerHTML =
+          '<p class="changelog-loading">Could not load live releases. <a href="https://github.com/preymium5-ctrl/Tarumi/releases" target="_blank" rel="noopener">Open GitHub Releases</a></p>';
+      }
+    }
+  };
+
+  loadReleases();
 
   // 7. Hero phone — 3D tilt (mouse on desktop, touch + idle float on mobile)
   const mockupScene = document.getElementById('mockup-scene');

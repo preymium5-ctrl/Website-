@@ -58,7 +58,7 @@
           </svg>
           GitHub
         </a>
-        <a href="https://github.com/preymium5-ctrl/Tarumi/releases/download/v1.6.2/app-release.apk" class="btn-cta btn-header" id="download-header-btn">Download APK</a>
+        <a href="https://github.com/preymium5-ctrl/Tarumi/releases/latest/download/app-release.apk" class="btn-cta btn-header" id="download-header-btn" data-release-download>Download APK</a>
       </nav>
     </div>
   </header>
@@ -70,7 +70,7 @@
     <div class="container hero-container">
       <div class="hero-content">
         <div class="badge-container">
-          <span class="version-badge">v1.6.2 Out Now</span>
+          <span class="version-badge" id="version-badge" data-release-version-label>Latest release</span>
           <span class="status-badge">100% Free & Open-Source</span>
         </div>
         <h1 class="hero-title">Your Ultimate Comic Haven,<br><span class="gradient-text">Ad-Free & Offline</span></h1>
@@ -78,11 +78,11 @@
           Tarumi is a premium, beautifully crafted Manga & Webtoon reader for Android. Built for speed, visual excellence, and complete privacy, it lets you read your favorite stories without interruptions.
         </p>
         <div class="hero-buttons">
-          <a href="https://github.com/preymium5-ctrl/Tarumi/releases/download/v1.6.2/app-release.apk" class="btn-cta btn-primary" id="download-hero-btn">
+          <a href="https://github.com/preymium5-ctrl/Tarumi/releases/latest/download/app-release.apk" class="btn-cta btn-primary" id="download-hero-btn" data-release-download>
             <svg class="icon" viewBox="0 0 24 24" width="20" height="20">
               <path fill="currentColor" d="M5 20h14v-2H5v2zm7-18L5.33 8.67l1.42 1.41L11 5.83V16h2V5.83l4.24 4.25 1.42-1.41L12 2z"/>
             </svg>
-            Download v1.6.2 APK
+            <span data-release-hero-label>Download Latest APK</span>
           </a>
           <a href="https://discord.gg/hVr5KNQRnk" target="_blank" rel="noopener" class="btn-cta btn-discord" id="discord-hero-btn">
             <svg class="icon icon-discord" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -275,11 +275,11 @@
             <p class="dl-desc">Download the latest official build directly on your Android device and start reading. Safe, open-source, and signed for release.</p>
             
             <div class="action-buttons">
-              <a href="https://github.com/preymium5-ctrl/Tarumi/releases/download/v1.6.2/app-release.apk" class="btn-cta btn-primary dl-btn-main">
+              <a href="https://github.com/preymium5-ctrl/Tarumi/releases/latest/download/app-release.apk" class="btn-cta btn-primary dl-btn-main" id="download-main-btn" data-release-download>
                 <svg class="icon" viewBox="0 0 24 24" width="24" height="24">
                   <path fill="currentColor" d="M5 20h14v-2H5v2zm7-18L5.33 8.67l1.42 1.41L11 5.83V16h2V5.83l4.24 4.25 1.42-1.41L12 2z"/>
                 </svg>
-                Download app-release.apk (v1.6.2)
+                <span data-release-main-label>Download app-release.apk</span>
               </a>
             </div>
 
@@ -306,7 +306,7 @@
             <h3 class="dl-stats-title">Build Information</h3>
             <div class="stat-row">
               <span class="stat-label">Version</span>
-              <span class="stat-val font-code">v1.6.2</span>
+              <span class="stat-val font-code" id="stat-version" data-release-version>Latest</span>
             </div>
             <div class="stat-row">
               <span class="stat-label">Package Name</span>
@@ -314,11 +314,11 @@
             </div>
             <div class="stat-row">
               <span class="stat-label">File Size</span>
-              <span class="stat-val">~40.9 MB</span>
+              <span class="stat-val" id="stat-size" data-release-size>—</span>
             </div>
             <div class="stat-row">
               <span class="stat-label">Release Date</span>
-              <span class="stat-val">July 20, 2026</span>
+              <span class="stat-val" id="stat-date" data-release-date>—</span>
             </div>
             <div class="stat-row">
               <span class="stat-label">Keystore</span>
@@ -326,6 +326,9 @@
             </div>
             <div class="divider"></div>
             <div class="stat-links">
+              <a href="https://github.com/preymium5-ctrl/Tarumi/releases" target="_blank" rel="noopener" class="stat-link" id="stat-releases-link">
+                View all releases on GitHub &rarr;
+              </a>
               <a href="https://github.com/preymium5-ctrl/Tarumi" target="_blank" rel="noopener" class="stat-link">
                 View Source Code on GitHub &rarr;
               </a>
@@ -344,71 +347,9 @@
         <p class="section-subtitle">Read details about our recent development logs, feature upgrades, and parser fixes.</p>
       </div>
 
-      <div class="timeline-accordion">
-        
-        <!-- Accordion Item 1 (v1.6.2) -->
-        <div class="accordion-item active">
-          <button class="accordion-header" aria-expanded="true">
-            <span class="accordion-version">Tarumi v1.6.2 <span class="badge-tag latest-tag">Latest</span></span>
-            <span class="accordion-date">July 20, 2026</span>
-            <svg class="accordion-arrow" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
-          </button>
-          <div class="accordion-content">
-            <div class="accordion-content-inner">
-              <p class="changelog-summary">Release-channel build featuring minified APK outputs, Animated AVIF motion page decoders, Hitomi GameCG mapping, and splash screen immersion fixes.</p>
-              <ul class="changelog-details">
-                <li><strong>🔒 Release Protection</strong>: Shifted to production signatures (<code>app-release.apk</code>) under package ID <code>com.tarumi.reader</code> with full R8 rules mapping (Hilt, Room, Coil, WorkManager).</li>
-                <li><strong>🖼️ Animated AVIF</strong>: Wired decoder pipelines to auto-recognize <code>.avis</code> extensions and play animated comic images rather than freezing on the first frame.</li>
-                <li><strong>🎮 Hitomi GameCG</strong>: Enabled GameCG mappings inside details views and processed animated gallery page assets seamlessly.</li>
-                <li><strong>📖 Reader Fixes</strong>: Next-chapter vertical loading is robust; PageLoader runs local-first downloaded page resolutions for offline readings.</li>
-                <li><strong>✨ Immersion Splashes</strong>: Status and system navigation bars blend completely on startup; splitted splitted videos are properly cropped.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Accordion Item 2 (v1.6.1) -->
-        <div class="accordion-item">
-          <button class="accordion-header" aria-expanded="false">
-            <span class="accordion-version">Tarumi v1.6.1</span>
-            <span class="accordion-date">July 15, 2026</span>
-            <svg class="accordion-arrow" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
-          </button>
-          <div class="accordion-content">
-            <div class="accordion-content-inner">
-              <p class="changelog-summary">UX fix release centered on progress-bar UI upgrades, scroll positioning fixes, and specific source configurations.</p>
-              <ul class="changelog-details">
-                <li><strong>🏠 Recent Updates Control</strong>: Switching the Recent updates row off hides only summaries and details; headings stay accessible below status boundaries.</li>
-                <li><strong>⬇️ Per-Chapter Download Bars</strong>: Expanded rows now show live progress bars derived from active WorkManager actions.</li>
-                <li><strong>📖 Chapter UX</strong>: Clicking bookmark titles opens chapter details with the scroll position locked to the very top.</li>
-                <li><strong>📴 Offline Progress Sync</strong>: Offline readers prioritize local page totals first, avoiding progress resets on connection losses.</li>
-                <li><strong>🧩 Comix fixes</strong>: Capture hooks launch before XHR callbacks, restoring missing chapter lists.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Accordion Item 3 (v1.6.0) -->
-        <div class="accordion-item">
-          <button class="accordion-header" aria-expanded="false">
-            <span class="accordion-version">Tarumi v1.6.0</span>
-            <span class="accordion-date">July 14, 2026</span>
-            <svg class="accordion-arrow" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
-          </button>
-          <div class="accordion-content">
-            <div class="accordion-content-inner">
-              <p class="changelog-summary">Performance-centric update targeting home page caching, 7-day automatic rails refresh cycles, and bookmarked tag optimizations.</p>
-              <ul class="changelog-details">
-                <li><strong>🏠 Feeds Optimization</strong>: Featured rows paint from fast-stored metadata listings; full detail queries execute only on opening details.</li>
-                <li><strong>📅 Background Prefetching</strong>: Featured recommendations auto-refresh on a 7-day window with pre-loaded buffers, preventing loading lags.</li>
-                <li><strong>🏷️ Type Classification</strong>: Corrected issues misclassifying Manhwa (webtoons) as Manhua by reviewing type tags prior to source queries.</li>
-                <li><strong>🔖 Bookmarks Badge Updates</strong>: Library chapter trackers store total chapter updates and display custom "NEW" indicators.</li>
-                <li><strong>✨ App Intro Animation</strong>: Integrated a premium 3-second muted branding startup splash video.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
+      <!-- Populated live from GitHub Releases API -->
+      <div class="timeline-accordion" id="changelog-list" data-release-changelog>
+        <div class="changelog-loading" id="changelog-loading">Loading releases from GitHub…</div>
       </div>
     </div>
   </section>
@@ -544,7 +485,7 @@
     <div class="footer-bottom">
       <div class="container footer-bottom-container">
         <p class="copyright">&copy; 2026 Tarumi. Licensed under GPL-3.0. Made with ❤️ by manga enthusiasts.</p>
-        <p class="version-label">Current Version: v1.6.2 (Stable)</p>
+        <p class="version-label" id="footer-version" data-release-footer>Current Version: Latest</p>
       </div>
     </div>
   </footer>
