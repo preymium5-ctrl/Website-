@@ -772,4 +772,86 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 10. Scroll Reveal Animations (Intersection Observer)
+  const initScrollReveal = () => {
+    // Hero Elements
+    const heroLeft = document.querySelector('.hero-content');
+    if (heroLeft && !heroLeft.classList.contains('reveal-left')) heroLeft.classList.add('reveal-left');
+
+    const heroRight = document.querySelector('.hero-mockup-wrapper');
+    if (heroRight && !heroRight.classList.contains('reveal-right')) heroRight.classList.add('reveal-right');
+
+    // Section Titles & Subtitles
+    const sectionTitles = document.querySelectorAll('.section-title, .section-subtitle, .section-tag, .section-header');
+    sectionTitles.forEach(el => {
+      if (!el.classList.contains('reveal') && !el.classList.contains('reveal-pop')) {
+        el.classList.add('reveal');
+      }
+    });
+
+    // Grid Containers (Feature cards, FAQ cards, Stats, Tech stacks)
+    const gridContainers = document.querySelectorAll('.features-grid, .faq-grid, .stats-grid, .tech-grid');
+    gridContainers.forEach(container => {
+      const items = container.children;
+      Array.from(items).forEach((item, index) => {
+        if (!item.classList.contains('reveal') && !item.classList.contains('reveal-pop')) {
+          item.classList.add('reveal-pop');
+          const delayClass = `delay-${Math.min((index + 1) * 100, 500)}`;
+          item.classList.add(delayClass);
+        }
+      });
+    });
+
+    // Timeline Changelog Items
+    const timelineItems = document.querySelectorAll('.accordion-item');
+    timelineItems.forEach((item, index) => {
+      if (!item.classList.contains('reveal') && !item.classList.contains('reveal-left')) {
+        item.classList.add('reveal-left');
+        const delayClass = `delay-${Math.min(((index % 3) + 1) * 100, 300)}`;
+        item.classList.add(delayClass);
+      }
+    });
+
+    // Gallery Carousel Section
+    const galleryContainer = document.querySelector('.gallery-section .slider-container');
+    if (galleryContainer && !galleryContainer.classList.contains('reveal-pop')) {
+      galleryContainer.classList.add('reveal-pop');
+    }
+
+    // Community / Download CTA Cards
+    const ctaCards = document.querySelectorAll('.cta-banner, .github-community-banner, .community-card, .footer-content');
+    ctaCards.forEach(card => {
+      if (!card.classList.contains('reveal') && !card.classList.contains('reveal-pop')) {
+        card.classList.add('reveal-pop');
+      }
+    });
+
+    // IntersectionObserver Setup
+    if ('IntersectionObserver' in window) {
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -60px 0px',
+        threshold: 0.1
+      };
+
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-pop');
+      revealElements.forEach(el => revealObserver.observe(el));
+    } else {
+      // Fallback for older browsers without IntersectionObserver
+      const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-pop');
+      revealElements.forEach(el => el.classList.add('active'));
+    }
+  };
+
+  initScrollReveal();
+
 });

@@ -2420,6 +2420,74 @@ button {
   }
 }
 
+/* ==========================================
+   Scroll Reveal Animations
+   ========================================== */
+
+/* Base hidden state for scroll reveal elements */
+.reveal,
+.reveal-left,
+.reveal-right,
+.reveal-pop {
+  opacity: 0;
+  will-change: opacity, transform;
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Default Fade-Up */
+.reveal {
+  transform: translateY(35px);
+}
+
+/* Slide from Left */
+.reveal-left {
+  transform: translateX(-45px);
+}
+
+/* Slide from Right */
+.reveal-right {
+  transform: translateX(45px);
+}
+
+/* Pop / Scale Up */
+.reveal-pop {
+  transform: translateY(25px) scale(0.94);
+}
+
+/* Revealed Active State */
+.reveal.active,
+.reveal-left.active,
+.reveal-right.active,
+.reveal-pop.active {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
+}
+
+/* Stagger Delays for Grid Items & Lists */
+.delay-50  { transition-delay: 0.05s; }
+.delay-100 { transition-delay: 0.10s; }
+.delay-150 { transition-delay: 0.15s; }
+.delay-200 { transition-delay: 0.20s; }
+.delay-250 { transition-delay: 0.25s; }
+.delay-300 { transition-delay: 0.30s; }
+.delay-350 { transition-delay: 0.35s; }
+.delay-400 { transition-delay: 0.40s; }
+.delay-450 { transition-delay: 0.45s; }
+.delay-500 { transition-delay: 0.50s; }
+
+/* Accessibility: Respect user reduced motion setting */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-pop {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 @media (max-width: 480px) {
   .slide-banner-container {
     padding: 1.25rem;
