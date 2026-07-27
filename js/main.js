@@ -571,8 +571,9 @@ document.addEventListener('DOMContentLoaded', () => {
           ? ' <span class="badge-tag latest-tag">Latest</span>'
           : '';
         const bodyHtml = markdownToHtml(release.body || '');
-        const expanded = isLatest ? 'active' : '';
-        const aria = isLatest ? 'true' : 'false';
+        // All changelogs start minimized by default
+        const expanded = '';
+        const aria = 'false';
 
         return `
           <div class="accordion-item ${expanded}">
@@ -802,15 +803,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Timeline Changelog Items
-    const timelineItems = document.querySelectorAll('.accordion-item');
-    timelineItems.forEach((item, index) => {
-      if (!item.classList.contains('reveal') && !item.classList.contains('reveal-left')) {
-        item.classList.add('reveal-left');
-        const delayClass = `delay-${Math.min(((index % 3) + 1) * 100, 300)}`;
-        item.classList.add(delayClass);
-      }
-    });
+    // Timeline Changelog Container
+    const changelogContainer = document.getElementById('changelog-list');
+    if (changelogContainer && !changelogContainer.classList.contains('reveal')) {
+      changelogContainer.classList.add('reveal');
+    }
 
     // Gallery Carousel Section
     const galleryContainer = document.querySelector('.gallery-section .slider-container');
