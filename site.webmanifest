@@ -1,0 +1,21 @@
+{
+  "name": "Tarumi – Free, Open-Source Manga, Manhwa & Manhua Reader",
+  "short_name": "Tarumi",
+  "icons": [
+    {
+      "src": "assets/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#120c08",
+  "background_color": "#120c08",
+  "display": "standalone"
+}
