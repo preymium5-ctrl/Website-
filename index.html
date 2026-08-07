@@ -16,7 +16,7 @@
   <meta property="og:url" content="https://tarumi.xyz/">
   <meta property="og:site_name" content="Tarumi">
   <meta property="og:title" content="Tarumi – Free Manga, Manhwa & Manhua Reader for Android">
-  <meta property="og:description" content="Read Manga, Manhwa & Manhua ad-free. Features 100% offline chapter downloads, Dark/Light/Coffee themes, 1,200+ sources, biometric lock, and Ask AI librarian.">
+  <meta property="og:description" content="Read Manga, Manhwa & Manhua ad-free. Features 100% offline chapter downloads, Dark/Light/Coffee themes, 1,200+ sources, floating navigation, and biometric lock.">
   <meta property="og:image" content="https://tarumi.xyz/assets/logo.png">
 
   <!-- Twitter -->
@@ -200,14 +200,14 @@
           <p class="feature-card-desc">Download chapters directly to your device storage for 100% offline reading. Enjoy continuous vertical scroll for Webtoons & Manhwa, and smooth page-turning for Manga & Manhua.</p>
         </div>
         <!-- Feature 4 -->
-        <div class="feature-card" id="f-ai">
+        <div class="feature-card" id="f-navigation">
           <div class="feature-icon-wrapper">
             <svg class="feature-icon" viewBox="0 0 24 24" width="32" height="32">
-              <path fill="currentColor" d="M19 13c.55 0 1-.45 1-1V8c0-.55-.45-1-1-1h-1V5c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v2H5c-.55 0-1 .45-1 1v4c0 .55.45 1 1 1h1v3c0 1.1.9 2 2 2h1v2c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-2h1c1.1 0 2-.9 2-2v-3h1zm-11-8h8v2H8V5zm8 12H8v-9h8v9zm-5.5-5.5a1.25 1.25 0 1 0 0-2.5a1.25 1.25 0 0 0 0 2.5zm3 0a1.25 1.25 0 1 0 0-2.5a1.25 1.25 0 0 0 0 2.5z"/>
+              <path fill="currentColor" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
             </svg>
           </div>
-          <h3 class="feature-card-title">Ask AI Librarian</h3>
-          <p class="feature-card-desc">Meet Tarumi, your personal AI-powered assistant. Ask for custom reading recommendations, seek series info, or filter titles with 18+ toggle controls.</p>
+          <h3 class="feature-card-title">Expressive Floating Navigation</h3>
+          <p class="feature-card-desc">Features a modern floating navigation bar with adaptive layouts across phones, tablets, landscape modes, and edge-to-edge screens.</p>
         </div>
         <!-- Feature 5 -->
         <div class="feature-card" id="f-privacy">
@@ -320,22 +320,22 @@
               </a>
             </div>
 
-            <!-- Important Migration Info Alert -->
+            <!-- Release Upgrade & Migration Info Alert -->
             <div class="migration-alert">
               <div class="alert-header">
                 <svg class="alert-icon" viewBox="0 0 24 24" width="20" height="20">
                   <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                 </svg>
-                <span>Migration Notice (Upgrading to v1.6.2+)</span>
+                <span>Release & Upgrade Info (v1.6.4 Out Now)</span>
               </div>
               <p class="alert-body">
-                Starting with **v1.6.2**, Tarumi switches from debug to a minified production APK (Package ID: <code>com.tarumi.reader</code>). You <strong>must reinstall the app</strong> following these steps to preserve your reading history:
+                Users on <strong>v1.6.3</strong> can install <strong>v1.6.4</strong> directly as a seamless in-place update. If upgrading from an old debug build (<code>com.tarumi.reader.debug</code>), follow these steps to preserve your reading data:
               </p>
               <ol class="alert-steps">
                 <li>Create a data backup: Go to <strong>Settings → Backup & restore → Create data backup</strong> and save it.</li>
-                <li>Uninstall your existing Tarumi / <code>app-debug</code> version.</li>
-                <li>Install the new <code>app-release.apk</code> downloaded above.</li>
-                <li>Restore progress: Open the app, go to <strong>Settings → Backup & restore → Restore</strong> and pick the saved backup.</li>
+                <li>Uninstall your old <code>app-debug</code> version.</li>
+                <li>Install the latest <code>app-release.apk</code> (Package ID: <code>com.tarumi.reader</code>).</li>
+                <li>Restore progress: Open the app, go to <strong>Settings → Backup & restore → Restore</strong> and pick your saved backup.</li>
               </ol>
             </div>
           </div>
@@ -424,11 +424,11 @@
           <!-- FAQ 3 -->
           <div class="faq-card">
             <button class="faq-question">
-              <span>Why does v1.6.2 require a manual clean reinstall?</span>
+              <span>How do updates work between release builds?</span>
               <svg class="faq-arrow" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
             </button>
             <div class="faq-answer">
-              <p>Starting from version 1.6.2, Tarumi moves from a debug build signing to a production release keystore (and switches package ID from <code>com.tarumi.reader.debug</code> to <code>com.tarumi.reader</code>). Android treats this as a different app. Therefore, you need to back up your data, uninstall the debug app, install the release APK, and restore the backup file.</p>
+              <p>Starting with v1.6.3 and v1.6.4, Tarumi is signed with our official release keystore (Package ID: <code>com.tarumi.reader</code>). All future release updates install directly over your existing app without requiring a reinstall!</p>
             </div>
           </div>
         </div>
@@ -447,11 +447,11 @@
           <!-- FAQ 5 -->
           <div class="faq-card">
             <button class="faq-question">
-              <span>What is the "Ask AI" chatbot librarian?</span>
+              <span>What is new in Tarumi v1.6.4?</span>
               <svg class="faq-arrow" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
             </button>
             <div class="faq-answer">
-              <p>It is an in-app helper powered by a conversational model. You can type commands like "recommend me mystery mangas with tags like fantasy" or "explain the plot of [Title]", and it parses details pages locally and recommends catalog series to you instantly.</p>
+              <p>Tarumi v1.6.4 introduces an expressive floating navigation bar, stronger Cloudflare challenge recovery, new catalog engines (Eris Scans, Cubari, YuriBase, Hwago), and fixes for OmegaScans chapter images.</p>
             </div>
           </div>
           <!-- FAQ 6 -->

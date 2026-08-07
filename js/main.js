@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerBtn = document.getElementById('download-header-btn');
     if (headerBtn) headerBtn.textContent = `Download ${tag}`;
 
-    document.title = `Tarumi ${tag} – Premium, Ad-Free Manga & Webtoon Reader for Android`;
+    document.title = `Tarumi ${tag} – Free, Ad-Free Manga, Manhwa & Manhua Reader for Android`;
   };
 
   const renderChangelog = (releases) => {
