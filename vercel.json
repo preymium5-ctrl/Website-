@@ -1,35 +1,5 @@
 {
-  "redirects": [
-    {
-      "source": "/:path(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.tarumi.xyz"
-        }
-      ],
-      "destination": "https://tarumi.xyz/:path",
-      "permanent": true
-    }
-  ],
   "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    },
     {
       "source": "/sitemap.xml",
       "headers": [
