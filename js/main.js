@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 8. Live GitHub Releases → download buttons, version labels, changelog
   const GITHUB_REPO = 'preymium5-ctrl/Tarumi';
   const RELEASES_API = `https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=10`;
-  const CACHE_KEY = 'tarumi_releases_cache_v1';
+  const CACHE_KEY = 'tarumi_releases_cache_v2';
   const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
   const escapeHtml = (str) =>

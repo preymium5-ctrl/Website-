@@ -18,7 +18,7 @@
   <meta property="og:url" content="https://tarumi.xyz/">
   <meta property="og:site_name" content="Tarumi">
   <meta property="og:title" content="Tarumi">
-  <meta property="og:description" content="Read Manga, Manhwa & Manhua ad-free. Features 100% offline chapter downloads, Dark/Light/Coffee themes, 1,200+ sources, floating navigation, and biometric lock.">
+  <meta property="og:description" content="Read Manga, Manhwa & Manhua ad-free. Features 100% offline chapter downloads, Dark/Light/Coffee themes, 1,200+ sources, bookmark repair, and biometric lock.">
   <meta property="og:image" content="https://tarumi.xyz/assets/logo.png">
 
   <!-- Twitter -->
@@ -148,7 +148,8 @@
         <div class="tech-pill-cloud">
           <span class="tech-pill"><span class="pill-dot"></span>1,200+ Catalogs</span>
           <span class="tech-pill"><span class="pill-dot"></span>Cloudflare Recovery</span>
-          <span class="tech-pill"><span class="pill-dot"></span>Floating Navigation</span>
+          <span class="tech-pill"><span class="pill-dot"></span>Smart Bookmark Repair</span>
+          <span class="tech-pill"><span class="pill-dot"></span>Android 8 Compatible</span>
           <span class="tech-pill"><span class="pill-dot"></span>Dark / Light / Coffee</span>
           <span class="tech-pill"><span class="pill-dot"></span>100% Offline Reads</span>
           <span class="tech-pill"><span class="pill-dot"></span>Biometric Lock</span>
@@ -222,14 +223,14 @@
           <p class="feature-card-desc">Download chapters for 100% offline reading. Enjoy continuous vertical scroll for Webtoons & Manhwa, and smooth page-turning for Manga & Manhua.</p>
         </div>
         <!-- Feature 5 -->
-        <div class="feature-card" id="f-navigation">
+        <div class="feature-card" id="f-repair">
           <div class="feature-icon-wrapper">
             <svg class="feature-icon" viewBox="0 0 24 24" width="32" height="32">
-              <path fill="currentColor" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+              <path fill="currentColor" d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/>
             </svg>
           </div>
-          <h3 class="feature-card-title">Expressive Floating Navigation</h3>
-          <p class="feature-card-desc">Features a modern floating navigation bar with adaptive layouts across phones, tablets, landscape modes, and edge-to-edge screens.</p>
+          <h3 class="feature-card-title">Precise Bookmark Repair</h3>
+          <p class="feature-card-desc">Target specific trusted sources or run full scans with the new source-selection repair dialog to fix broken bookmarks and find fresh replacements seamlessly.</p>
         </div>
         <!-- Feature 6 -->
         <div class="feature-card" id="f-engine">
@@ -238,8 +239,8 @@
               <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
             </svg>
           </div>
-          <h3 class="feature-card-title">OmegaScans & Refreshed Engines</h3>
-          <p class="feature-card-desc">Per-chapter media route resolution for OmegaScans, Eris Scans, Cubari, MangaPlus, DivaScans, YuriBase, Hwago, and 1,200+ sources.</p>
+          <h3 class="feature-card-title">ManhwaRead & OmegaScans Routing</h3>
+          <p class="feature-card-desc">Exact series slug matching for ManhwaRead prevents mismatched chapters, paired with per-chapter routing for OmegaScans and 1,200+ catalogs.</p>
         </div>
         <!-- Feature 7 -->
         <div class="feature-card" id="f-privacy">
@@ -358,10 +359,10 @@
                 <svg class="alert-icon" viewBox="0 0 24 24" width="20" height="20">
                   <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                 </svg>
-                <span>Release & Upgrade Info (v1.6.4 Out Now)</span>
+                <span>Release & Upgrade Info (v1.6.5 Out Now)</span>
               </div>
               <p class="alert-body">
-                Users on <strong>v1.6.3</strong> can install <strong>v1.6.4</strong> directly as a seamless in-place update. If upgrading from an old debug build (<code>com.tarumi.reader.debug</code>), follow these steps to preserve your reading data:
+                Users on <strong>v1.6.4</strong> (and v1.6.3) can install <strong>v1.6.5</strong> directly as a seamless in-place update. If upgrading from an old debug build (<code>com.tarumi.reader.debug</code>), follow these steps to preserve your reading data:
               </p>
               <ol class="alert-steps">
                 <li>Create a data backup: Go to <strong>Settings → Backup & restore → Create data backup</strong> and save it.</li>
@@ -460,7 +461,7 @@
               <svg class="faq-arrow" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
             </button>
             <div class="faq-answer">
-              <p>Starting with v1.6.3 and v1.6.4, Tarumi is signed with our official release keystore (Package ID: <code>com.tarumi.reader</code>). All future release updates install directly over your existing app without requiring a reinstall!</p>
+              <p>Starting with v1.6.3+, Tarumi is signed with our official release keystore (Package ID: <code>com.tarumi.reader</code>). All future release updates (including v1.6.5) install directly over your existing app without requiring a reinstall!</p>
             </div>
           </div>
         </div>
@@ -479,11 +480,11 @@
           <!-- FAQ 5 -->
           <div class="faq-card">
             <button class="faq-question">
-              <span>What is new in Tarumi v1.6.4?</span>
+              <span>What is new in Tarumi v1.6.5?</span>
               <svg class="faq-arrow" viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
             </button>
             <div class="faq-answer">
-              <p>Tarumi v1.6.4 introduces an expressive floating navigation bar, stronger Cloudflare challenge recovery, new catalog engines (Eris Scans, Cubari, YuriBase, Hwago), and fixes for OmegaScans chapter images.</p>
+              <p>Tarumi v1.6.5 brings reader reliability improvements with lower-memory compatibility for Android 8 devices, a multi-source selection dialog for bookmark Fix/repair, corrected ManhwaRead chapter matching, and a stabilized native bottom navigation bar.</p>
             </div>
           </div>
           <!-- FAQ 6 -->
