@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 8. Live GitHub Releases → download buttons, version labels, changelog
   const GITHUB_REPO = 'preymium5-ctrl/Tarumi';
   const RELEASES_API = `https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=10`;
-  const CACHE_KEY = 'tarumi_releases_cache_v2';
+  const CACHE_KEY = 'tarumi_releases_cache_v3';
   const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
   const escapeHtml = (str) =>
@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const applyReleaseMeta = (latest) => {
+  const applyReleaseMeta = (latest, releases = []) => {
     const tag = latest.tag_name || 'latest';
     const apk = pickApkAsset(latest);
     const downloadUrl =
@@ -546,6 +546,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const headerBtn = document.getElementById('download-header-btn');
     if (headerBtn) headerBtn.textContent = `Download ${tag}`;
+
+    // Dynamic Release & Upgrade Alert Box
+    const upgradeTitle = document.querySelector('[data-release-upgrade-title]');
+    if (upgradeTitle) upgradeTitle.textContent = `Release & Upgrade Info (${tag} Out Now)`;
+
+    const upgradeBody = document.querySelector('[data-release-upgrade-body]');
+    if (upgradeBody) {
+      const prevRelease = releases.find(r => !r.draft && !r.prerelease && r.tag_name !== tag);
+      const prevTag = prevRelease ? prevRelease.tag_name : '';
+      if (prevTag) {
+        upgradeBody.innerHTML = `Users on <strong>${escapeHtml(prevTag)}</strong> can install <strong>${escapeHtml(tag)}</strong> directly as a seamless in-place update. If upgrading from an old debug build (<code>com.tarumi.reader.debug</code>), follow these steps to preserve your reading data:`;
+      } else {
+        upgradeBody.innerHTML = `Users on previous release builds can install <strong>${escapeHtml(tag)}</strong> directly as a seamless in-place update. If upgrading from an old debug build (<code>com.tarumi.reader.debug</code>), follow these steps to preserve your reading data:`;
+      }
+    }
+
+    // Dynamic FAQ release update references
+    const faqCompat = document.querySelectorAll('[data-release-faq-version]');
+    faqCompat.forEach(el => {
+      el.textContent = tag;
+    });
+
+    const faqNewTitle = document.querySelector('[data-release-faq-new-title]');
+    if (faqNewTitle) faqNewTitle.textContent = `What is new in Tarumi ${tag}?`;
+
+    const faqNewDesc = document.querySelector('[data-release-faq-new-desc]');
+    if (faqNewDesc && latest.body) {
+      const lines = latest.body.replace(/\r\n/g, '\n').split('\n');
+      const firstPara = lines.find(l => {
+        const trimmed = l.trim();
+        return (
+          trimmed &&
+          !trimmed.startsWith('#') &&
+          !trimmed.startsWith('>') &&
+          !trimmed.startsWith('*') &&
+          !trimmed.startsWith('-') &&
+          !trimmed.startsWith('[!') &&
+          !trimmed.startsWith('**Package:**')
+        );
+      });
+      if (firstPara) {
+        faqNewDesc.textContent = firstPara.replace(/\*\*/g, '').replace(/`/g, '').trim();
+      }
+    }
 
     document.title = `Tarumi ${tag} – Free, Ad-Free Manga, Manhwa & Manhua Reader for Android`;
   };
@@ -616,9 +660,10 @@ document.addEventListener('DOMContentLoaded', () => {
         writeCache(releases);
       }
 
+      const published = releases.filter(r => !r.draft && !r.prerelease);
       const latest =
-        releases.find(r => !r.draft && !r.prerelease) || releases[0];
-      if (latest) applyReleaseMeta(latest);
+        published[0] || releases.find(r => !r.draft && !r.prerelease) || releases[0];
+      if (latest) applyReleaseMeta(latest, published);
       renderChangelog(releases);
     } catch (err) {
       console.warn('Failed to load GitHub releases:', err);
