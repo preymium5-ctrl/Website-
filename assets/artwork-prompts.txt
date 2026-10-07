@@ -1,0 +1,32 @@
+Created with the built-in imagegen tool. Original PNG masters are preserved in the Codex generated_images directory. The website uses optimized WebP copies.
+
+Use case: illustration-story
+Asset type: high-resolution panoramic illustration for the Tarumi Android manga reader website's new feature slideshow.
+Primary request: Create an exquisite cozy Japanese reading hideaway, inspired by Tarumi's warm kotatsu-and-cat brand. A small friendly cream-colored cat peeks out from under an orange terracotta quilted kotatsu at the right side of the composition. On the wooden tabletop are a ceramic coffee cup, a tiny mandarin orange, and a neatly stacked pair of closed books. In the right background are a softly lit shoji window, a small bookshelf, and the edge of a leafy potted plant. Quiet morning light, a feeling of escaping into stories.
+Style/medium: premium hand-painted editorial anime illustration, delicate confident linework, subtle paper grain, beautifully controlled atmospheric lighting and detailed material texture; sophisticated and warm, not childish clip-art.
+Composition/framing: very wide landscape 16:9, at least 2048 pixels wide if possible. Composition and detail concentrated on the rightmost 45 percent and bottom edge. The left half must be mostly uncluttered pale ivory wall and soft light with ample space for real HTML headlines. Calm asymmetrical composition, no heavy vignette. The cat and kotatsu should occupy only the lower right area, leaving upper right room for a real app screenshot that will be added separately in code.
+Color palette: ivory, oatmeal, warm sandstone, cinnamon and muted burnt orange, espresso brown outlines, restrained sage accent. Avoid purple, neon, saturated red, and black backgrounds.
+Lighting/mood: soft natural sunlight, subtle shadows, inviting reading-room atmosphere.
+Text: none.
+Constraints: no lettering, logos, watermarks, smartphone, fake app screen, UI, people, or copyrighted characters. Render a single coherent full-bleed illustration.
+
+--------------------
+
+Use case: illustration-story
+Asset type: original manga page displayed inside a mobile comic-reader mockup on the Tarumi website.
+Primary request: A stunning original black-and-white manga page titled only conceptually "The Lantern Keeper", without any visible text. A young adult traveler wearing a long scarf and a small messenger bag arrives at a quiet hillside town full of paper lanterns at dusk. A friendly tiny cat-like lantern spirit guides them. Five beautifully arranged comic panels: wide establishing view of the town and mountains at top; close-up of the traveler's expressive face; lantern spirit perched on a wooden bridge; dynamic full body traveler walking into the lantern-lined street; atmospheric wide final panel looking up at the moon. Consistent original characters across all panels.
+Style/medium: professional manga ink art, impeccable fine linework, bold blacks, delicate screentone, dynamic compositions, rich architectural detail, readable storytelling.
+Composition/framing: portrait comic page around 1024x1536, clean rectangular panels with narrow white gutters, composition fills the page, no external device or frame. High detail suitable for a sharp mobile preview.
+Text: absolutely none, no title, no dialogue, no speech bubbles, no lettering, no watermark.
+Constraints: all characters and scenery original; no recognizable existing manga characters or logos. No phone or app UI. The image itself is the comic page.
+
+--------------------
+
+Use case: illustration-story
+Asset type: original full-color vertical webtoon artwork displayed inside a mobile reading mockup on the Tarumi manga reader website.
+Primary request: A gorgeous original fantasy webtoon sequence without text: a young adult courier with short dark brown hair, sage-green jacket, tan messenger bag and orange scarf discovers a tiny glowing cream-colored cat spirit in a rooftop garden above a Japanese hillside town. Four vertical panels tell a quiet magical moment: a panoramic rooftop greenhouse with sunlight and drifting leaves, a close-up of the surprised courier, the small lantern-cat spirit floating above a tea cup, then a beautiful tall final view of the courier and cat looking over the sunset town.
+Style/medium: professionally illustrated premium Korean webtoon look with crisp expressive line art, cinematic watercolor lighting, soft nuanced cel shading and exquisite background detail. Cozy adventure rather than comedy. Completely original consistent character.
+Composition/framing: portrait 2:3 page, around 1024x1536. Four stacked panels separated by white breathing space designed for vertical scrolling, no outer frame, no phone or UI. Artwork fills each panel.
+Color palette: sage foliage, ivory clouds, cinnamon wood, blue sky and golden sunlight, tiny terracotta accents. Refined balanced color, no neon.
+Text: none. No lettering, speech bubbles, titles, logos, signatures or watermarks.
+Constraints: only original characters; no recognizable copyrighted anime characters. The image is the comic artwork alone.

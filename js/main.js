@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('resize', () => {
-      if (window.innerWidth > 992 && navMenu.classList.contains('active')) {
+      if (window.innerWidth > 850 && navMenu.classList.contains('active')) {
         setMenuOpen(false);
       }
     });
@@ -73,201 +73,126 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   window.addEventListener('scroll', scrollSpy);
 
-  // 4. Interactive Slide Carousel (Screenshots) + mobile swipe
-  const slides = document.querySelectorAll('.slide');
-  const dots = document.querySelectorAll('.dot');
-  const prevBtn = document.getElementById('prev-btn');
-  const nextBtn = document.getElementById('next-btn');
+  // Accessible slideshow: manual controls, swipe, and optional rotation.
+  const carousel = document.querySelector('.showcase-slider');
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dots = Array.from(document.querySelectorAll('.dot'));
   const sliderWrapper = document.getElementById('slider-wrapper');
+  const rotationBtn = document.getElementById('rotation-btn');
+  const slideStatus = document.getElementById('slide-status');
+  const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   let currentSlide = 0;
-  let isAnimating = false;
+  let autoPlay = !motionPreference.matches;
+  let inView = !('IntersectionObserver' in window);
+  let hovered = false;
+  let rotationTimer;
 
-  const showSlide = (index, direction = 'next') => {
-    if (!slides.length) return;
-    if (index === currentSlide && slides[index].classList.contains('active')) return;
-    if (isAnimating) return;
-
-    const total = slides.length;
-    index = ((index % total) + total) % total;
-
-    const prev = slides[currentSlide];
-    const next = slides[index];
-
-    isAnimating = true;
-
-    // Clear residual animation classes
-    slides.forEach(slide => {
-      slide.classList.remove(
-        'active',
-        'slide-in-left',
-        'slide-in-right',
-        'slide-out-left',
-        'slide-out-right'
-      );
-    });
-    dots.forEach(dot => dot.classList.remove('active'));
-
-    const outClass = direction === 'next' ? 'slide-out-left' : 'slide-out-right';
-    const inClass = direction === 'next' ? 'slide-in-right' : 'slide-in-left';
-
-    if (prev) {
-      prev.classList.add(outClass);
+  const updateRotation = () => {
+    clearInterval(rotationTimer);
+    if (rotationBtn) {
+      rotationBtn.textContent = autoPlay ? 'Pause' : 'Play';
+      rotationBtn.setAttribute('aria-label', autoPlay ? 'Pause slideshow' : 'Play slideshow');
     }
-    next.classList.add('active', inClass);
-    if (dots[index]) dots[index].classList.add('active');
-    currentSlide = index;
-
-    const cleanup = () => {
-      slides.forEach(slide => {
-        slide.classList.remove(
-          'slide-in-left',
-          'slide-in-right',
-          'slide-out-left',
-          'slide-out-right'
-        );
-      });
-      isAnimating = false;
-    };
-
-    // Fallback if animationend doesn't fire
-    const timer = setTimeout(cleanup, 450);
-    next.addEventListener('animationend', () => {
-      clearTimeout(timer);
-      cleanup();
-    }, { once: true });
+    if (autoPlay && inView && !hovered && !document.hidden) {
+      rotationTimer = setInterval(() => showSlide(currentSlide + 1), 7000);
+    }
   };
 
-  const goPrev = () => showSlide(currentSlide - 1, 'prev');
-  const goNext = () => showSlide(currentSlide + 1, 'next');
-
-  if (prevBtn && nextBtn) {
-    prevBtn.addEventListener('click', goPrev);
-    nextBtn.addEventListener('click', goNext);
-
-    dots.forEach(dot => {
-      dot.addEventListener('click', () => {
-        const slideIndex = parseInt(dot.getAttribute('data-slide'), 10);
-        if (Number.isNaN(slideIndex)) return;
-        const direction = slideIndex > currentSlide ? 'next' : 'prev';
-        showSlide(slideIndex, direction);
-      });
+  const showSlide = (index, announce = false) => {
+    if (!slides.length) return;
+    currentSlide = (index + slides.length) % slides.length;
+    slides.forEach((slide, i) => {
+      slide.hidden = i !== currentSlide;
+      slide.classList.toggle('active', i === currentSlide);
     });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === currentSlide);
+      dot.setAttribute('aria-pressed', String(i === currentSlide));
+    });
+    if (announce && slideStatus) {
+      slideStatus.textContent = `Slide ${slides[currentSlide].getAttribute('aria-label')}`;
+    }
+  };
+
+  const manualSlide = (index) => {
+    autoPlay = false;
+    showSlide(index, true);
+    updateRotation();
+  };
+
+  document.getElementById('prev-btn')?.addEventListener('click', () => manualSlide(currentSlide - 1));
+  document.getElementById('next-btn')?.addEventListener('click', () => manualSlide(currentSlide + 1));
+  dots.forEach(dot => dot.addEventListener('click', () => manualSlide(Number(dot.dataset.slide))));
+  rotationBtn?.addEventListener('click', () => {
+    autoPlay = !autoPlay;
+    updateRotation();
+  });
+
+  if (carousel && sliderWrapper) {
+    carousel.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        manualSlide(currentSlide + (event.key === 'ArrowRight' ? 1 : -1));
+      }
+    });
+    carousel.addEventListener('focusin', () => {
+      autoPlay = false;
+      updateRotation();
+    });
+    carousel.addEventListener('mouseenter', () => { hovered = true; updateRotation(); });
+    carousel.addEventListener('mouseleave', () => { hovered = false; updateRotation(); });
+    let swipeStart = null;
+    sliderWrapper.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      swipeStart = { x: event.clientX, y: event.clientY };
+    });
+    sliderWrapper.addEventListener('pointerup', event => {
+      if (!swipeStart) return;
+      const dx = event.clientX - swipeStart.x;
+      const dy = event.clientY - swipeStart.y;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+        manualSlide(currentSlide + (dx < 0 ? 1 : -1));
+      }
+      swipeStart = null;
+    });
+    sliderWrapper.addEventListener('pointercancel', () => { swipeStart = null; });
+    sliderWrapper.addEventListener('dragstart', event => event.preventDefault());
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(entries => {
+        inView = entries[0].isIntersecting;
+        updateRotation();
+      }, { threshold: 0.25 }).observe(carousel);
+    }
   }
+  document.addEventListener('visibilitychange', updateRotation);
+  motionPreference.addEventListener('change', () => {
+    if (motionPreference.matches) autoPlay = false;
+    updateRotation();
+  });
+  updateRotation();
 
-  // Touch / pointer swipe on the gallery
-  if (sliderWrapper && slides.length) {
-    let startX = 0;
-    let startY = 0;
-    let deltaX = 0;
-    let tracking = false;
-    let lockedAxis = null; // 'x' | 'y' | null
-    const SWIPE_THRESHOLD = 45;
-    const DRAG_RESISTANCE = 0.35;
-
-    const resetDragVisual = () => {
-      sliderWrapper.style.setProperty('--drag-x', '0px');
-      sliderWrapper.classList.remove('is-dragging');
-      slides.forEach(slide => {
-        slide.style.transform = '';
-      });
-    };
-
-    const onPointerDown = (clientX, clientY) => {
-      if (isAnimating) return;
-      tracking = true;
-      lockedAxis = null;
-      startX = clientX;
-      startY = clientY;
-      deltaX = 0;
-      sliderWrapper.classList.add('is-dragging');
-    };
-
-    const onPointerMove = (clientX, clientY, event) => {
-      if (!tracking) return;
-      const dx = clientX - startX;
-      const dy = clientY - startY;
-
-      if (!lockedAxis) {
-        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-        lockedAxis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      }
-
-      // Vertical intent → let the page scroll
-      if (lockedAxis === 'y') {
-        tracking = false;
-        resetDragVisual();
-        return;
-      }
-
-      if (event && event.cancelable) event.preventDefault();
-      deltaX = dx;
-      const offset = deltaX * DRAG_RESISTANCE;
-      sliderWrapper.style.setProperty('--drag-x', `${offset}px`);
-
-      const active = slides[currentSlide];
-      if (active) {
-        active.style.transform = `translateX(${offset}px)`;
-      }
-    };
-
-    const onPointerUp = () => {
-      if (!tracking && deltaX === 0) {
-        resetDragVisual();
-        return;
-      }
-      tracking = false;
-
-      const active = slides[currentSlide];
-      if (active) active.style.transform = '';
-
-      if (Math.abs(deltaX) >= SWIPE_THRESHOLD) {
-        if (deltaX < 0) {
-          goNext(); // swipe left → next
-        } else {
-          goPrev(); // swipe right → previous
-        }
-      }
-      deltaX = 0;
-      lockedAxis = null;
-      resetDragVisual();
-    };
-
-    // Touch events (mobile)
-    sliderWrapper.addEventListener('touchstart', (e) => {
-      const t = e.changedTouches[0];
-      onPointerDown(t.clientX, t.clientY);
-    }, { passive: true });
-
-    sliderWrapper.addEventListener('touchmove', (e) => {
-      const t = e.changedTouches[0];
-      onPointerMove(t.clientX, t.clientY, e);
-    }, { passive: false });
-
-    sliderWrapper.addEventListener('touchend', onPointerUp, { passive: true });
-    sliderWrapper.addEventListener('touchcancel', () => {
-      tracking = false;
-      deltaX = 0;
-      lockedAxis = null;
-      resetDragVisual();
-    }, { passive: true });
-
-    // Mouse drag (desktop convenience)
-    let mouseDown = false;
-    sliderWrapper.addEventListener('mousedown', (e) => {
-      if (e.button !== 0) return;
-      mouseDown = true;
-      onPointerDown(e.clientX, e.clientY);
+  // Original comic art in an illustrative page/scroll reader.
+  const readerModes = document.querySelectorAll('[data-reader-mode]');
+  const readerViewport = document.getElementById('reader-viewport');
+  const readerArtwork = document.getElementById('reader-artwork');
+  readerModes.forEach(button => button.addEventListener('click', () => {
+    const webtoon = button.dataset.readerMode === 'webtoon';
+    readerModes.forEach(mode => {
+      const selected = mode === button;
+      mode.classList.toggle('active', selected);
+      mode.setAttribute('aria-pressed', String(selected));
     });
-    window.addEventListener('mousemove', (e) => {
-      if (!mouseDown) return;
-      onPointerMove(e.clientX, e.clientY, e);
-    });
-    window.addEventListener('mouseup', () => {
-      if (!mouseDown) return;
-      mouseDown = false;
-      onPointerUp();
-    });
-  }
+    readerViewport.classList.toggle('webtoon-mode', webtoon);
+    readerViewport.setAttribute('aria-label', webtoon ? 'Scrollable webtoon preview' : 'Manga page preview');
+    readerArtwork.hidden = webtoon;
+    document.getElementById('webtoon-panels').hidden = !webtoon;
+    readerViewport.scrollTop = 0;
+    document.getElementById('reader-story-title').textContent = webtoon ? 'A Rooftop Away' : 'The Lantern Keeper';
+    document.getElementById('reader-mode-label').textContent = webtoon ? 'Webtoon mode' : 'Page mode';
+    document.getElementById('reader-position').textContent = webtoon ? 'Scroll to explore' : '1 / 1';
+    document.getElementById('reader-hint').textContent = webtoon ? 'Scroll inside the screen to follow the story.' : 'A complete page, at a glance.';
+    document.getElementById('reader-status').textContent = webtoon ? 'Webtoon preview selected. Scroll inside the phone to read.' : 'Manga page preview selected.';
+  }));
 
   // 5. Timeline Changelog Accordions (works with static + dynamically loaded items)
   const changelogRoot = document.getElementById('changelog-list');
@@ -298,12 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const h = innerItem.querySelector('.accordion-header');
           const c = innerItem.querySelector('.accordion-content');
           if (h) h.setAttribute('aria-expanded', 'false');
-          if (c) c.style.maxHeight = null;
+          if (c) { c.style.maxHeight = null; c.inert = true; }
         });
 
         if (!isActive) {
           item.classList.add('active');
           headerEl.setAttribute('aria-expanded', 'true');
+          contentEl.inert = false;
           contentEl.style.maxHeight = contentEl.scrollHeight + 'px';
         }
       });
@@ -318,6 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
   faqCards.forEach(card => {
     const questionBtn = card.querySelector('.faq-question');
     const answerEl = card.querySelector('.faq-answer');
+    const answerId = `faq-answer-${Array.from(faqCards).indexOf(card) + 1}`;
+    answerEl.id = answerId;
+    answerEl.inert = true;
+    questionBtn.setAttribute('aria-controls', answerId);
+    questionBtn.setAttribute('aria-expanded', 'false');
 
     questionBtn.addEventListener('click', () => {
       const isActive = card.classList.contains('active');
@@ -327,11 +258,15 @@ document.addEventListener('DOMContentLoaded', () => {
       column.querySelectorAll('.faq-card').forEach(innerCard => {
         innerCard.classList.remove('active');
         innerCard.querySelector('.faq-answer').style.maxHeight = null;
+        innerCard.querySelector('.faq-answer').inert = true;
+        innerCard.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
       });
 
       // Expand if it wasn't active
       if (!isActive) {
         card.classList.add('active');
+        questionBtn.setAttribute('aria-expanded', 'true');
+        answerEl.inert = false;
         answerEl.style.maxHeight = answerEl.scrollHeight + 'px';
       }
     });
@@ -626,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="accordion-date">${date}</span>
               <svg class="accordion-arrow" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6 1.41-1.41z"/></svg>
             </button>
-            <div class="accordion-content">
+            <div class="accordion-content" inert>
               <div class="accordion-content-inner changelog-body">
                 ${bodyHtml}
                 <p class="changelog-release-link">
@@ -679,221 +614,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadReleases();
 
-  // 7. Hero phone — 3D tilt (mouse on desktop, touch + idle float on mobile)
-  const mockupScene = document.getElementById('mockup-scene');
-  const heroPhone = document.getElementById('hero-phone');
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const coarsePointer = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-
-  if (mockupScene && heroPhone && !prefersReducedMotion) {
-    let targetRX = 0;
-    let targetRY = 0;
-    let currentRX = 0;
-    let currentRY = 0;
-    let interacting = false;
-    let rafId = null;
-    let idleTime = 0;
-    let lastTs = 0;
-
-    const maxTilt = coarsePointer ? 14 : 12;
-    // Mobile keeps a continuous idle loop so the phone always animates
-    const alwaysAnimate = coarsePointer || window.matchMedia('(max-width: 992px)').matches;
-
-    const applyTiltFromPoint = (clientX, clientY) => {
-      const rect = mockupScene.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      const px = (clientX - rect.left) / rect.width;
-      const py = (clientY - rect.top) / rect.height;
-      // Clamp so off-edge touches don't over-rotate
-      const cx = Math.min(1, Math.max(0, px));
-      const cy = Math.min(1, Math.max(0, py));
-      targetRY = (cx - 0.5) * maxTilt * 2;
-      targetRX = (0.5 - cy) * maxTilt * 2;
-    };
-
-    const animate = (ts) => {
-      if (!lastTs) lastTs = ts;
-      const dt = Math.min(0.05, (ts - lastTs) / 1000);
-      lastTs = ts;
-
-      // Gentle floating idle motion when not interacting (especially mobile)
-      if (!interacting && alwaysAnimate) {
-        idleTime += dt;
-        targetRX = Math.sin(idleTime * 0.9) * 5 + Math.sin(idleTime * 0.35) * 1.5;
-        targetRY = Math.cos(idleTime * 0.7) * 6 + Math.sin(idleTime * 0.45) * 2;
-      }
-
-      const ease = alwaysAnimate ? 0.08 : 0.1;
-      currentRX += (targetRX - currentRX) * ease;
-      currentRY += (targetRY - currentRY) * ease;
-
-      heroPhone.style.transform =
-        `rotateX(${currentRX.toFixed(3)}deg) rotateY(${currentRY.toFixed(3)}deg)`;
-
-      const stillMoving =
-        Math.abs(targetRX - currentRX) > 0.04 ||
-        Math.abs(targetRY - currentRY) > 0.04;
-
-      if (interacting || stillMoving || alwaysAnimate) {
-        rafId = requestAnimationFrame(animate);
-      } else {
-        rafId = null;
-        lastTs = 0;
-      }
-    };
-
-    const startLoop = () => {
-      if (rafId == null) {
-        lastTs = 0;
-        rafId = requestAnimationFrame(animate);
-      }
-    };
-
-    // Desktop pointer tracking
-    mockupScene.addEventListener('mouseenter', () => {
-      interacting = true;
-      startLoop();
-    });
-
-    mockupScene.addEventListener('mousemove', (e) => {
-      interacting = true;
-      applyTiltFromPoint(e.clientX, e.clientY);
-      startLoop();
-    });
-
-    mockupScene.addEventListener('mouseleave', () => {
-      interacting = false;
-      if (!alwaysAnimate) {
-        targetRX = 0;
-        targetRY = 0;
-      }
-      startLoop();
-    });
-
-    // Mobile / touch tracking — tilt follows finger on the phone
-    mockupScene.addEventListener('touchstart', (e) => {
-      const t = e.changedTouches[0];
-      if (!t) return;
-      interacting = true;
-      applyTiltFromPoint(t.clientX, t.clientY);
-      startLoop();
-    }, { passive: true });
-
-    mockupScene.addEventListener('touchmove', (e) => {
-      const t = e.changedTouches[0];
-      if (!t) return;
-      interacting = true;
-      applyTiltFromPoint(t.clientX, t.clientY);
-      startLoop();
-    }, { passive: true });
-
-    const endTouch = () => {
-      interacting = false;
-      // Return to idle float on mobile; settle flat on desktop-only
-      if (!alwaysAnimate) {
-        targetRX = 0;
-        targetRY = 0;
-      }
-      startLoop();
-    };
-
-    mockupScene.addEventListener('touchend', endTouch, { passive: true });
-    mockupScene.addEventListener('touchcancel', endTouch, { passive: true });
-
-    // Kick off idle animation immediately on mobile / small screens
-    if (alwaysAnimate) {
-      heroPhone.classList.add('is-animated');
-      startLoop();
-    }
-
-    // If user rotates/resizes into a mobile layout, start idle motion
-    window.addEventListener('resize', () => {
-      const shouldIdle =
-        window.matchMedia('(hover: none) and (pointer: coarse)').matches ||
-        window.matchMedia('(max-width: 992px)').matches;
-      if (shouldIdle) {
-        heroPhone.classList.add('is-animated');
-        startLoop();
-      }
-    });
-  }
-
-  // 10. Scroll Reveal Animations (Intersection Observer)
-  const initScrollReveal = () => {
-    // Hero Elements
-    const heroLeft = document.querySelector('.hero-content');
-    if (heroLeft && !heroLeft.classList.contains('reveal-left')) heroLeft.classList.add('reveal-left');
-
-    const heroRight = document.querySelector('.hero-mockup-wrapper');
-    if (heroRight && !heroRight.classList.contains('reveal-right')) heroRight.classList.add('reveal-right');
-
-    // Section Titles & Subtitles
-    const sectionTitles = document.querySelectorAll('.section-title, .section-subtitle, .section-tag, .section-header');
-    sectionTitles.forEach(el => {
-      if (!el.classList.contains('reveal') && !el.classList.contains('reveal-pop')) {
-        el.classList.add('reveal');
-      }
-    });
-
-    // Grid Containers (Feature cards, FAQ cards, Stats, Tech stacks)
-    const gridContainers = document.querySelectorAll('.features-grid, .faq-grid, .stats-grid, .tech-grid');
-    gridContainers.forEach(container => {
-      const items = container.children;
-      Array.from(items).forEach((item, index) => {
-        if (!item.classList.contains('reveal') && !item.classList.contains('reveal-pop')) {
-          item.classList.add('reveal-pop');
-          const delayClass = `delay-${Math.min((index + 1) * 100, 500)}`;
-          item.classList.add(delayClass);
-        }
-      });
-    });
-
-    // Timeline Changelog Container
-    const changelogContainer = document.getElementById('changelog-list');
-    if (changelogContainer && !changelogContainer.classList.contains('reveal')) {
-      changelogContainer.classList.add('reveal');
-    }
-
-    // Gallery Carousel Section
-    const galleryContainer = document.querySelector('.gallery-section .slider-container');
-    if (galleryContainer && !galleryContainer.classList.contains('reveal-pop')) {
-      galleryContainer.classList.add('reveal-pop');
-    }
-
-    // Community / Download CTA Cards
-    const ctaCards = document.querySelectorAll('.cta-banner, .github-community-banner, .community-card, .footer-content');
-    ctaCards.forEach(card => {
-      if (!card.classList.contains('reveal') && !card.classList.contains('reveal-pop')) {
-        card.classList.add('reveal-pop');
-      }
-    });
-
-    // IntersectionObserver Setup
-    if ('IntersectionObserver' in window) {
-      const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px -60px 0px',
-        threshold: 0.1
-      };
-
-      const revealObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, observerOptions);
-
-      const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-pop');
-      revealElements.forEach(el => revealObserver.observe(el));
-    } else {
-      // Fallback for older browsers without IntersectionObserver
-      const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-pop');
-      revealElements.forEach(el => el.classList.add('active'));
-    }
-  };
-
-  initScrollReveal();
 
 });
